@@ -6,22 +6,22 @@
     ------------------------------------------------------------------------------------------------------
     */
 	
-CREATE SYNONYM klienci FOR KICIORB_DEV.clients;
-CREATE SYNONYM adresy FOR KICIORB_DEV.addresses;
-CREATE SYNONYM adres_typ FOR KICIORB_DEV.address_types;
-CREATE SYNONYM ilosc_typ FOR KICIORB_DEV.amount_types;
-CREATE SYNONYM klienci_firma FOR KICIORB_DEV.clients_firm;
-CREATE SYNONYM kontakty FOR KICIORB_DEV.contacts;
-CREATE SYNONYM umowa_typ FOR KICIORB_DEV.contract_types;
-CREATE SYNONYM umowy FOR KICIORB_DEV.contracts;
-CREATE SYNONYM faktury FOR KICIORB_DEV.factures;
-CREATE SYNONYM statusy_zamowien FOR KICIORB_DEV.orders_status;
-CREATE SYNONYM zamowienia FOR KICIORB_DEV.orders;
-CREATE SYNONYM pozycja_faktury FOR KICIORB_DEV.positions;
-CREATE SYNONYM produkt_typ FOR KICIORB_DEV.product_types;
-CREATE SYNONYM produkty FOR KICIORB_DEV.products;
-CREATE SYNONYM uzytkownicy FOR KICIORB_DEV.users;
-CREATE SYNONYM uzytkownicy_firma FOR KICIORB_DEV.users_firm;
-CREATE SYNONYM waluta_typ FOR KICIORB_DEV.value_types;
-CREATE SYNONYM magazyn FOR KICIORB_DEV.warehouse;
-CREATE SYNONYM pracownicy FOR KICIORB_DEV.workers;
+CREATE SYNONYM klienci FOR isop.clients;
+CREATE SYNONYM adresy FOR isop.addresses;
+CREATE SYNONYM adres_typ FOR isop.address_types;
+CREATE SYNONYM ilosc_typ FOR isop.amount_types;
+CREATE SYNONYM klienci_firma FOR isop.clients_firm;
+CREATE SYNONYM kontakty FOR isop.contacts;
+CREATE SYNONYM umowa_typ FOR isop.contract_types;
+CREATE SYNONYM umowy FOR isop.contracts;
+CREATE SYNONYM faktury FOR isop.factures;
+CREATE SYNONYM statusy_zamowien FOR isop.orders_status;
+CREATE SYNONYM zamowienia FOR isop.orders;
+CREATE SYNONYM pozycja_faktury FOR isop.positions;
+CREATE SYNONYM produkt_typ FOR isop.product_types;
+CREATE SYNONYM produkty FOR isop.products;
+CREATE SYNONYM uzytkownicy FOR isop.users;
+CREATE SYNONYM uzytkownicy_firma FOR isop.users_firm;
+CREATE SYNONYM waluta_typ FOR isop.value_types;
+CREATE SYNONYM magazyn FOR isop.warehouse;
+CREATE SYNONYM pracownicy FOR isop.workers;
