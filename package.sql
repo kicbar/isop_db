@@ -17,7 +17,7 @@ create or replace PACKAGE PKG_ADD_CLIENT AS
     2.0.27.05    27/05/2020   b.kicior   Usunięcie powiązania z userem.
     ------------------------------------------------------------------------------------------------------
     */
-    PROCEDURE insert_client;
+    PROCEDURE r_insert_client;
     /*
     Ta procedura odpowiada za wprowadzenie danych do bazy.
     ------------------------------------------------------------------------------------------------------
@@ -25,7 +25,7 @@ create or replace PACKAGE PKG_ADD_CLIENT AS
     1.0.20/04    20/04/2020   b.kicior   Utworzenie procedury. 
     ------------------------------------------------------------------------------------------------------
     */
-    PROCEDURE insert_client_contact;
+    PROCEDURE r_insert_client_contact;
     /*
     Ta procedura odpowiada za wprowadzenie danych do bazy.
     ------------------------------------------------------------------------------------------------------
@@ -33,7 +33,7 @@ create or replace PACKAGE PKG_ADD_CLIENT AS
     1.0.20/04    20/04/2020   b.kicior   Utworzenie procedury. 
     ------------------------------------------------------------------------------------------------------
     */
-    PROCEDURE insert_client_address;
+    PROCEDURE r_insert_client_address;
     /*
     Ta procedura odpowiada za wprowadzenie danych do bazy.
     ------------------------------------------------------------------------------------------------------
@@ -41,7 +41,7 @@ create or replace PACKAGE PKG_ADD_CLIENT AS
     1.0.20/04    20/04/2020   b.kicior   Utworzenie procedury. 
     ------------------------------------------------------------------------------------------------------
     */
-    PROCEDURE insert_client_firm;
+    PROCEDURE r_insert_client_firm;
     /*
     Ta procedura odpowiada za wprowadzenie danych do bazy.
     ------------------------------------------------------------------------------------------------------
@@ -49,7 +49,7 @@ create or replace PACKAGE PKG_ADD_CLIENT AS
     1.0.20/04    20/04/2020   b.kicior   Utworzenie procedury. 
     ------------------------------------------------------------------------------------------------------
     */
-    PROCEDURE update_client;
+    PROCEDURE r_update_client;
     /*
     Ta procedura odpowiada za wprowadzenie danych do bazy.
     ------------------------------------------------------------------------------------------------------
@@ -57,7 +57,7 @@ create or replace PACKAGE PKG_ADD_CLIENT AS
     1.0.20/04    20/04/2020   b.kicior   Utworzenie procedury. 
     ------------------------------------------------------------------------------------------------------
     */
-    PROCEDURE delete_client;
+    PROCEDURE r_delete_client;
     /*
     Ta procedura odpowiada za wprowadzenie danych do bazy.
     ------------------------------------------------------------------------------------------------------
@@ -73,7 +73,7 @@ create or replace PACKAGE PKG_ADD_CLIENT AS
     1.0.20/04    20/04/2020   b.kicior   Utworzenie funkcji. 
     ------------------------------------------------------------------------------------------------------
     */
-    FUNCTION validate_client_contact RETURN BOOLEAN;
+    FUNCTION f_validate_client_contact RETURN BOOLEAN;
     /*
     Ta funkcja sprawdza poprawność wprowadzanych danych.
     ------------------------------------------------------------------------------------------------------
@@ -81,7 +81,7 @@ create or replace PACKAGE PKG_ADD_CLIENT AS
     1.0.20/04    20/04/2020   b.kicior   Utworzenie funkcji. 
     ------------------------------------------------------------------------------------------------------
     */
-    FUNCTION validate_client_address RETURN BOOLEAN;
+    FUNCTION f_validate_client_address RETURN BOOLEAN;
     /*
     Ta funkcja sprawdza poprawność wprowadzanych danych.
     ------------------------------------------------------------------------------------------------------
@@ -89,7 +89,7 @@ create or replace PACKAGE PKG_ADD_CLIENT AS
     1.0.20/04    20/04/2020   b.kicior   Utworzenie funkcji. 
     ------------------------------------------------------------------------------------------------------
     */
-    FUNCTION validate_client_firm RETURN BOOLEAN;
+    FUNCTION f_validate_client_firm RETURN BOOLEAN;
     /*
     Ta funkcja sprawdza poprawność wprowadzanych danych.
     ------------------------------------------------------------------------------------------------------
@@ -97,7 +97,7 @@ create or replace PACKAGE PKG_ADD_CLIENT AS
     1.0.20/04    20/04/2020   b.kicior   Utworzenie funkcji. 
     ------------------------------------------------------------------------------------------------------
     */
-    PROCEDURE make_insert;
+    PROCEDURE r_make_insert;
     /*
     Ta funkcja wykonuje pozostale.
     ------------------------------------------------------------------------------------------------------

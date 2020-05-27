@@ -23,35 +23,35 @@ create or replace PACKAGE BODY PKG_ADD_CLIENT AS
         CLOSE c_client_search;
     END f_client_exist;
     
-    PROCEDURE insert_client IS 
+    PROCEDURE r_insert_client IS 
 	BEGIN 
 		NULL;
-	END insert_client;
+	END r_insert_client;
     
-    PROCEDURE insert_client_contact IS 
+    PROCEDURE r_insert_client_contact IS 
 	BEGIN 
 		NULL;
-	END insert_client_contact;
+	END r_insert_client_contact;
 
-    PROCEDURE insert_client_address IS 
+    PROCEDURE r_insert_client_address IS 
 	BEGIN 
 		NULL;
-	END insert_client_address;
+	END r_insert_client_address;
 
-    PROCEDURE insert_client_firm IS 
+    PROCEDURE r_insert_client_firm IS 
 	BEGIN 
 		NULL;
-	END insert_client_firm;
+	END r_insert_client_firm;
 
-    PROCEDURE update_client IS 
+    PROCEDURE r_update_client IS 
 	BEGIN 
 		NULL;
-	END update_client;
+	END r_update_client;
 
-    PROCEDURE delete_client IS 
+    PROCEDURE r_delete_client IS 
 	BEGIN 
 		NULL;
-	END delete_client; 
+	END r_delete_client; 
 
 	FUNCTION f_validate_client(v_fname_client clients.fname%type, v_lname_client clients.lname%type ) RETURN BOOLEAN IS
 		v_flag BOOLEAN := TRUE;
@@ -85,30 +85,30 @@ create or replace PACKAGE BODY PKG_ADD_CLIENT AS
 		dbms_output.put_line(v_show_bool);
     END f_validate_client;
 
-	FUNCTION validate_client_contact RETURN BOOLEAN IS
+	FUNCTION f_validate_client_contact RETURN BOOLEAN IS
         v_flag BOOLEAN := TRUE;
     BEGIN 
         NULL;
         RETURN v_flag;
-    END validate_client_contact;
+    END f_validate_client_contact;
 
-	FUNCTION validate_client_address RETURN BOOLEAN IS
+	FUNCTION f_validate_client_address RETURN BOOLEAN IS
         v_flag BOOLEAN := TRUE;
     BEGIN 
         NULL;
         RETURN v_flag;
-    END validate_client_address;
+    END f_validate_client_address;
 
-	FUNCTION validate_client_firm RETURN BOOLEAN IS
+	FUNCTION f_validate_client_firm RETURN BOOLEAN IS
         v_flag BOOLEAN := TRUE;
     BEGIN 
         NULL;
         RETURN v_flag;
-    END validate_client_firm;
+    END f_validate_client_firm;
 
-        PROCEDURE make_insert IS 
+        PROCEDURE r_make_insert IS 
 	BEGIN 
 		NULL;
-	END make_insert;
+	END r_make_insert;
 
 END PKG_ADD_CLIENT;
