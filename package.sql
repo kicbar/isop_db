@@ -65,7 +65,7 @@ create or replace PACKAGE PKG_ADD_CLIENT AS
     1.0.20/04    20/04/2020   b.kicior   Utworzenie procedury. 
     ------------------------------------------------------------------------------------------------------
     */
-    FUNCTION f_validate_client(v_fname_client clients.fname%type, v_lname_client clients.lname%type, , v_pesel_client clients.pesel%type) RETURN BOOLEAN;
+    FUNCTION f_validate_client(v_fname_client clients.fname%type, v_lname_client clients.lname%type,v_pesel_client clients.pesel%type) RETURN BOOLEAN;
     /*
     Ta funkcja sprawdza poprawność wprowadzanych danych.
     ------------------------------------------------------------------------------------------------------

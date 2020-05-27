@@ -1,6 +1,6 @@
 create or replace PACKAGE BODY PKG_ADD_CLIENT AS
 
-    FUNCTION f_client_exist ( v_pesel_in NUMBER) RETURN BOOLEAN 
+    FUNCTION f_client_exist(v_pesel_in NUMBER) RETURN BOOLEAN 
     IS
         CURSOR c_client_search 
         IS
@@ -8,27 +8,38 @@ create or replace PACKAGE BODY PKG_ADD_CLIENT AS
               FROM clients
              WHERE pesel = v_pesel_in
                AND status = 1;
-        v_flag_out boolean;
+        v_flag_out boolean := FALSE;
         v_temp_client   clients%rowtype; --TO ZMIENIC NA VAARAY
     BEGIN
         OPEN c_client_search;
         FETCH c_client_search INTO v_temp_client;
     		IF c_client_search%found THEN
-    			v_flag_out := TRUE;
+                --DBMS_OUTPUT.PUT_LINE('FALSE! Client with pesel: ' || v_pesel_in || ' already exist.');
+                DBMS_OUTPUT.PUT_LINE('Client not exist: FALSE');
     			RETURN v_flag_out;
     		ELSE
-    			v_flag_out := FALSE;
+    			v_flag_out := TRUE;
+                DBMS_OUTPUT.PUT_LINE('Client not exist: TRUE');
+                --DBMS_OUTPUT.PUT_LINE('TRUE! Client with pesel: ' || v_pesel_in || ' not exist.');
     			RETURN v_flag_out;
     		END IF;
         CLOSE c_client_search;
     END f_client_exist;
     
     PROCEDURE r_insert_client(v_fname clients.fname%type, v_lname clients.lname%type, v_pesel clients.pesel%type) IS
-    	inserts_count INTEGER := 0;
+    	inserts_count    INTEGER := 0;
+        validate_return  BOOLEAN;
+        exist_return     BOOLEAN;
 	BEGIN
-    	INSERT INTO CLIENTS(fname, lname, pesel) VALUES(v_fname, v_lname, v_pesel);
-    	inserts_count := inserts_count + SQL%ROWCOUNT;
-    	DBMS_OUTPUT.PUT_LINE('Inserted ' || inserts_count || ' rows into CLIENTS table.');
+        validate_return := f_validate_client(v_fname, v_lname, v_pesel);
+        exist_return := f_client_exist(v_pesel);
+        IF validate_return = TRUE AND exist_return = TRUE THEN
+            INSERT INTO CLIENTS(fname, lname, pesel) VALUES(v_fname, v_lname, v_pesel);
+            inserts_count := inserts_count + SQL%ROWCOUNT;
+            DBMS_OUTPUT.PUT_LINE('Inserted ' || inserts_count || ' rows into CLIENTS table.');
+        ELSE 
+            DBMS_OUTPUT.PUT_LINE('INSERT NOT EXECUTED! VALIDATE CLIENT RETURN FALSE. ');
+        END IF;
 	END r_insert_client;
     
     PROCEDURE r_insert_client_contact IS 
@@ -59,7 +70,7 @@ create or replace PACKAGE BODY PKG_ADD_CLIENT AS
 	FUNCTION f_validate_client(v_fname_client clients.fname%type, v_lname_client clients.lname%type, v_pesel_client clients.pesel%type) RETURN BOOLEAN IS
 		v_flag BOOLEAN := TRUE;
 		v_show_bool VARCHAR2(10);
-		v_alphabet VARCHAR2(35) := 'aąbcćdeęfghijklłmnńoópqrsśtuvwxyzźż-';
+		v_alphabet VARCHAR2(100) := 'aąbcćdeęfghijklłmnńoópqrsśtuvwxyzźż-';
 	BEGIN 
 		--VALIDATE FNAME
 		IF  LENGTH(TRIM(TRANSLATE(upper(v_fname_client), upper(v_alphabet),' '))) > 0 THEN
@@ -74,7 +85,9 @@ create or replace PACKAGE BODY PKG_ADD_CLIENT AS
 				--VALIDATE PESEL
 				IF LENGTH(v_pesel_client) != 11 THEN
                 	v_flag := FALSE;
-                	DBMS_OUTPUT.PUT_LINE('ERROR PESEL! YOUR PESEL IS TOO SHORT, IT MUST HAVE 11 DIGITS.'); 
+                	DBMS_OUTPUT.PUT_LINE('ERROR PESEL! YOUR PESEL MUST HAVE 11 DIGITS.'); 
+                ELSE
+                    DBMS_OUTPUT.PUT_LINE('VALIDATION SUCCESFUL.'); 
                 END IF;
 				/*Przyjmuje na ta chwile ze peselu nie trzeba walidowac
 				Pole jest typu INTEGER wiec i tak sie wywali, nalezaloby jednak przechwywcic ten wyjatek i sprawic zeby komunikat byl czytelniejszy
@@ -87,7 +100,8 @@ create or replace PACKAGE BODY PKG_ADD_CLIENT AS
 		v_show_bool:=CASE WHEN (sys.diutil.bool_to_int(v_flag)) = 1 THEN 'TRUE'
 						  WHEN (sys.diutil.bool_to_int(v_flag)) = 0 THEN  'FALSE'
 		END;  
-		dbms_output.put_line(v_show_bool);
+        dbms_output.put_line('Validate return: ' || v_show_bool);
+        RETURN v_flag;
     END f_validate_client;
 
 	FUNCTION f_validate_client_contact RETURN BOOLEAN IS
