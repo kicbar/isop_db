@@ -1,13 +1,3 @@
-create sequence user_seq
-start with 1 increment by 1
-MINVALUE 1 MAXVALUE 100000
-CYCLE CACHE 2 ORDER;
-
-create sequence user_firm_seq
-start with 1 increment by 1
-MINVALUE 1 MAXVALUE 100000
-CYCLE CACHE 2 ORDER;
-
 create sequence client_seq
 start with 1 increment by 1
 MINVALUE 1 MAXVALUE 100000

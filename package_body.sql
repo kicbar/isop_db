@@ -1,13 +1,12 @@
 create or replace PACKAGE BODY PKG_ADD_CLIENT AS
 
-    FUNCTION f_client_exist ( v_pesel_in NUMBER,v_id_user_in INTEGER ) RETURN BOOLEAN 
+    FUNCTION f_client_exist ( v_pesel_in NUMBER) RETURN BOOLEAN 
     IS
         CURSOR c_client_search 
         IS
             SELECT *
               FROM clients
              WHERE pesel = v_pesel_in
-               AND id_user = v_id_user_in
                AND status = 1;
         v_flag_out boolean;
         v_temp_client   clients%rowtype; --TO ZMIENIC NA VAARAY

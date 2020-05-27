@@ -1,39 +1,10 @@
-CREATE OR REPLACE FUNCTION f_check_user_exist(v_email_in IN VARCHAR2)
-    /*
-    Ta funkcja sprawdza na podstawie email czy w systemie istnieje aktywny uzytkownik.
-    Używana podczas rejestracji użytkownika.
-    ------------------------------------------------------------------------------------------------------
-    VERSION      DATE         AUTHOR     DESCRIPTION
-    1.0.16/04    16/04/2020   b.kicior   Utworzenie funkcji. 
-    1.0.16/04    16/04/2020   b.kicior   Utworzenie podstawowych funkcjonalności. 
-    ------------------------------------------------------------------------------------------------------
-    */
-RETURN VARCHAR2 IS
-    err_unknown EXCEPTION;
-    v_temp_email VARCHAR2(20);
-BEGIN
-    SELECT count(*) INTO v_temp_email FROM users WHERE upper(email) = upper(v_email_in) and status = 1;
-    CASE
-    WHEN v_temp_email > 0 THEN RETURN 'EXIST';
-    WHEN v_temp_email <= 0 THEN RETURN 'NOTEXIST';
-    ELSE raise err_unknown;
-    END CASE;
-EXCEPTION
-    WHEN err_unknown THEN 
-        raise_application_error(-20510, 'Wystapil problem z wprowadzonymi danymi! ERROR: '||SQLERRM||' '||SQLCODE);
-    WHEN OTHERS THEN
-        raise_application_error(-20500, 'Wystapil nieznany wyjatek! ERROR: '||SQLERRM||' '||SQLCODE);
-END f_check_user_exist;
-/
-
-
-
-CREATE OR REPLACE FUNCTION f_check_client_exist ( v_pesel_in NUMBER,v_id_user_in INTEGER ) RETURN BOOLEAN IS 
+CREATE OR REPLACE FUNCTION f_check_client_exist (v_pesel_in NUMBER) RETURN BOOLEAN IS 
     /*
     Ta funkcja sprawdza czy dla danego użytkownika isnieja klienci o wskazanym numerze pesel. 
     ------------------------------------------------------------------------------------------------------
     VERSION      DATE         AUTHOR     DESCRIPTION
     1.0.15/04    15/04/2020   b.kicior   Utworzenie podstawowych funkcjonalności. 
+    2.0.27/05    27/05/2020   b.kicior   Usunięcie id_user.  
     ------------------------------------------------------------------------------------------------------
     */
     CURSOR c_client_search 
@@ -41,7 +12,6 @@ CREATE OR REPLACE FUNCTION f_check_client_exist ( v_pesel_in NUMBER,v_id_user_in
         SELECT *
         FROM clients
         WHERE pesel = v_pesel_in
-        AND id_user = v_id_user_in
         AND status = 1;
     v_flag_out boolean;
     v_temp_client   clients%rowtype; --TO ZMIENIC NA VAARAY
@@ -60,13 +30,14 @@ END f_check_client_exist;
 /
 
 
-CREATE OR REPLACE FUNCTION f_get_id_facture ( v_facture_name_in VARCHAR2, v_id_user_in INTEGER)
+CREATE OR REPLACE FUNCTION f_get_id_facture (v_facture_name_in VARCHAR2)
 /*
     Ta funkcja zwraca id_facture na podstawie nazwy faktury(dla danego uzytkownika).
     ------------------------------------------------------------------------------------------------------
     VERSION     DATE         AUTHOR     DESCRIPTION
     1.0.16/04   16/04/2020   b.kicior   Utworzenie funkcji. 
     1.1.16/04   16/04/2020   b.kicior   Dodanie funkcjonalnosci.
+    2.0.27/05   27/05/2020   b.kicior   Usunięcie id_user.  
     ------------------------------------------------------------------------------------------------------
 */ 
 RETURN INTEGER IS
@@ -76,7 +47,6 @@ RETURN INTEGER IS
         SELECT id_facture
         FROM factures
         WHERE upper(facture_name) = upper(v_facture_name_in)
-        AND id_user = v_id_user_in 
         AND status = 1;
 BEGIN
     OPEN c_get_facture_id;
@@ -97,13 +67,14 @@ END f_get_id_facture;
 /
 
 
-create or replace FUNCTION f_x_get_facture_value ( v_facture_name_in VARCHAR2,v_id_user_in INTEGER ) 
+create or replace FUNCTION f_x_get_facture_value ( v_facture_name_in VARCHAR2 ) 
 /*
     Ta funkcja zwraca calkowita wartość pozycji faktury na podstawie nazwy faktury(dla danego uzytkownika).
     ------------------------------------------------------------------------------------------------------
     VERSION     DATE         AUTHOR     DESCRIPTION
     1.0.16/04   16/04/2020   b.kicior   Utworzenie funkcji. 
     1.1.16/04   16/04/2020   b.kicior   Dodanie funkcjonalnosci.
+    2.0.27/05   27/05/2020   b.kicior   Usunięcie id_user.  
     ------------------------------------------------------------------------------------------------------
 */ 
 RETURN NUMBER IS
@@ -112,7 +83,7 @@ BEGIN
     SELECT SUM(value_cost)
     INTO v_value_facture
     FROM positions
-    WHERE id_facture = f_get_id_facture(v_facture_name_in,v_id_user_in);
+    WHERE id_facture = f_get_id_facture(v_facture_name_in);
     --DBMS_OUTPUT.PUT_LINE('Value of facture: '||v_facture_name_in||' is: '|| v_value_facture);
     RETURN v_value_facture;
 EXCEPTION 

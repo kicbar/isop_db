@@ -8,12 +8,13 @@ create or replace PACKAGE PKG_ADD_CLIENT AS
     ------------------------------------------------------------------------------------------------------
     */
     
-    FUNCTION f_client_exist ( v_pesel_in NUMBER,v_id_user_in INTEGER ) RETURN BOOLEAN;
+    FUNCTION f_client_exist ( v_pesel_in NUMBER) RETURN BOOLEAN;
     /*
     Ta funkcja sprawdza czy dla danego użytkownika isnieja klienci o wskazanym numerze pesel. 
     ------------------------------------------------------------------------------------------------------
     VERSION      DATE         AUTHOR     DESCRIPTION
     1.0.27.05    27/05/2020   b.kicior   Utworzenie podstawowych funkcjonalności. 
+    2.0.27.05    27/05/2020   b.kicior   Usunięcie powiązania z userem.
     ------------------------------------------------------------------------------------------------------
     */
     PROCEDURE insert_client;
