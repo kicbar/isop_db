@@ -1,61 +1,19 @@
-CREATE OR REPLACE PACKAGE PKG_ADD_USER AS 
-    /*
-    Ten pakiet odpowiada za wprowadzanie użytkowników systemu. 
-	Przeprowadza walidacje oraz insertuje dane.
-    ------------------------------------------------------------------------------------------------------
-    VERSION      DATE         AUTHOR     DESCRIPTION
-    1.0.19/04    19/04/2020   b.kicior   Utworzenie pakietu. 
-    ------------------------------------------------------------------------------------------------------
-    */
-    PROCEDURE insert_user;
-    /*
-    Ta procedura odpowiada za wprowadzenie danych do bazy.
-    ------------------------------------------------------------------------------------------------------
-    VERSION      DATE         AUTHOR     DESCRIPTION
-    1.0.19/04    19/04/2020   b.kicior   Utworzenie procedury. 
-    ------------------------------------------------------------------------------------------------------
-    */
-    FUNCTION validate_user RETURN BOOLEAN;
-    /*
-    Ta funkcja sprawdza poprawność wprowadzanych danych.
-    ------------------------------------------------------------------------------------------------------
-    VERSION      DATE         AUTHOR     DESCRIPTION
-    1.0.19/04    19/04/2020   b.kicior   Utworzenie funkcji. 
-    ------------------------------------------------------------------------------------------------------
-    */
-END PKG_ADD_USER;
-/
-
-CREATE OR REPLACE PACKAGE BODY PKG_ADD_USER AS
-
-    PROCEDURE insert_user IS
-    BEGIN 
-        /*
-        INSERT INTO USERS () VALUES ();
-        INSERT INTO USERS_FIRM () VALUES ();
-        */
-        NULL;
-    END insert_user;
-
-    FUNCTION validate_user RETURN BOOLEAN IS
-        v_flag BOOLEAN := TRUE;
-    BEGIN 
-        NULL;
-        RETURN v_flag;
-    END validate_user;
-  
-END PKG_ADD_USER;
-/
-------------------------------------------------------------------------------------------------------------
-'**********************************************************************************************************'
-------------------------------------------------------------------------------------------------------------
-CREATE OR REPLACE PACKAGE PKG_ADD_CLIENT AS 
+create or replace PACKAGE PKG_ADD_CLIENT AS 
     /*
     Ten pakiet odpowiada za wprowadzanie klientów do systemu. 
 	Przeprowadza walidacje oraz insertuje dane.
     ------------------------------------------------------------------------------------------------------
     VERSION      DATE         AUTHOR     DESCRIPTION
     1.0.20/04    20/04/2020   b.kicior   Utworzenie pakietu. 
+    ------------------------------------------------------------------------------------------------------
+    */
+    
+    FUNCTION f_client_exist ( v_pesel_in NUMBER,v_id_user_in INTEGER ) RETURN BOOLEAN;
+    /*
+    Ta funkcja sprawdza czy dla danego użytkownika isnieja klienci o wskazanym numerze pesel. 
+    ------------------------------------------------------------------------------------------------------
+    VERSION      DATE         AUTHOR     DESCRIPTION
+    1.0.27.05    27/05/2020   b.kicior   Utworzenie podstawowych funkcjonalności. 
     ------------------------------------------------------------------------------------------------------
     */
     PROCEDURE insert_client;
@@ -106,7 +64,7 @@ CREATE OR REPLACE PACKAGE PKG_ADD_CLIENT AS
     1.0.20/04    20/04/2020   b.kicior   Utworzenie procedury. 
     ------------------------------------------------------------------------------------------------------
     */
-    FUNCTION validate_client RETURN BOOLEAN;
+    FUNCTION f_validate_client(v_fname_client clients.fname%type, v_lname_client clients.lname%type) RETURN BOOLEAN;
     /*
     Ta funkcja sprawdza poprawność wprowadzanych danych.
     ------------------------------------------------------------------------------------------------------
@@ -138,7 +96,7 @@ CREATE OR REPLACE PACKAGE PKG_ADD_CLIENT AS
     1.0.20/04    20/04/2020   b.kicior   Utworzenie funkcji. 
     ------------------------------------------------------------------------------------------------------
     */
-	PROCEDURE make_insert;
+    PROCEDURE make_insert;
     /*
     Ta funkcja wykonuje pozostale.
     ------------------------------------------------------------------------------------------------------
@@ -147,72 +105,3 @@ CREATE OR REPLACE PACKAGE PKG_ADD_CLIENT AS
     ------------------------------------------------------------------------------------------------------
     */
 END PKG_ADD_CLIENT;
-/
-
-CREATE OR REPLACE PACKAGE BODY PKG_ADD_CLIENT AS
-
-    PROCEDURE insert_client IS 
-	BEGIN 
-		NULL;
-	END insert_client;
-
-    PROCEDURE insert_client_contact IS 
-	BEGIN 
-		NULL;
-	END insert_client_contact;
-	
-    PROCEDURE insert_client_address IS 
-	BEGIN 
-		NULL;
-	END insert_client_address;
-	
-    PROCEDURE insert_client_firm IS 
-	BEGIN 
-		NULL;
-	END insert_client_firm;
-
-    PROCEDURE update_client IS 
-	BEGIN 
-		NULL;
-	END update_client;
-
-    PROCEDURE delete_client IS 
-	BEGIN 
-		NULL;
-	END delete_client; 
-	
-	FUNCTION validate_client RETURN BOOLEAN IS
-        v_flag BOOLEAN := TRUE;
-    BEGIN 
-        NULL;
-        RETURN v_flag;
-    END validate_client;
-
-	FUNCTION validate_client_contact RETURN BOOLEAN IS
-        v_flag BOOLEAN := TRUE;
-    BEGIN 
-        NULL;
-        RETURN v_flag;
-    END validate_client_contact;
-
-	FUNCTION validate_client_address RETURN BOOLEAN IS
-        v_flag BOOLEAN := TRUE;
-    BEGIN 
-        NULL;
-        RETURN v_flag;
-    END validate_client_address;
-
-	FUNCTION validate_client_firm RETURN BOOLEAN IS
-        v_flag BOOLEAN := TRUE;
-    BEGIN 
-        NULL;
-        RETURN v_flag;
-    END validate_client_firm;
-    
-        PROCEDURE make_insert IS 
-	BEGIN 
-		NULL;
-	END make_insert;
-    
-END PKG_ADD_CLIENT;
-/
