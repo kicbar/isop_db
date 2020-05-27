@@ -23,9 +23,12 @@ create or replace PACKAGE BODY PKG_ADD_CLIENT AS
         CLOSE c_client_search;
     END f_client_exist;
     
-    PROCEDURE r_insert_client IS 
-	BEGIN 
-		NULL;
+    PROCEDURE r_insert_client(v_fname clients.fname%type, v_lname clients.lname%type, v_pesel clients.pesel%type) IS
+    	inserts_count INTEGER := 0;
+	BEGIN
+    	INSERT INTO CLIENTS(fname, lname, pesel) VALUES(v_fname, v_lname, v_pesel);
+    	inserts_count := inserts_count + SQL%ROWCOUNT;
+    	DBMS_OUTPUT.PUT_LINE('Inserted ' || inserts_count || ' rows into CLIENTS table.');
 	END r_insert_client;
     
     PROCEDURE r_insert_client_contact IS 
@@ -53,16 +56,15 @@ create or replace PACKAGE BODY PKG_ADD_CLIENT AS
 		NULL;
 	END r_delete_client; 
 
-	FUNCTION f_validate_client(v_fname_client clients.fname%type, v_lname_client clients.lname%type ) RETURN BOOLEAN IS
+	FUNCTION f_validate_client(v_fname_client clients.fname%type, v_lname_client clients.lname%type, v_pesel_client clients.pesel%type) RETURN BOOLEAN IS
 		v_flag BOOLEAN := TRUE;
 		v_show_bool VARCHAR2(10);
 		v_alphabet VARCHAR2(35) := 'aąbcćdeęfghijklłmnńoópqrsśtuvwxyzźż-';
 	BEGIN 
 		--VALIDATE FNAME
 		IF  LENGTH(TRIM(TRANSLATE(upper(v_fname_client), upper(v_alphabet),' '))) > 0 THEN
-			DBMS_OUTPUT.PUT_LINE('ERROR FIRST NAME! IN THIS FIELD YOU CAN USE ONLY LETTERS. ');
 			v_flag := FALSE;
-			--tutaj zwracam blad, a jesli jest git to lece do elsa 
+            DBMS_OUTPUT.PUT_LINE('ERROR FIRST NAME! IN THIS FIELD YOU CAN USE ONLY LETTERS. ');
 		ELSE 
 			--VALIDATE LNAME
 			IF LENGTH(TRIM(TRANSLATE(upper(v_lname_client), upper(v_alphabet),' '))) > 0 THEN
@@ -70,17 +72,20 @@ create or replace PACKAGE BODY PKG_ADD_CLIENT AS
 				v_flag := FALSE;
 			ELSE 
 				--VALIDATE PESEL
+				IF LENGTH(v_pesel_client) != 11 THEN
+                	v_flag := FALSE;
+                	DBMS_OUTPUT.PUT_LINE('ERROR PESEL! YOUR PESEL IS TOO SHORT, IT MUST HAVE 11 DIGITS.'); 
+                END IF;
 				/*Przyjmuje na ta chwile ze peselu nie trzeba walidowac
 				Pole jest typu INTEGER wiec i tak sie wywali, nalezaloby jednak przechwywcic ten wyjatek i sprawic zeby komunikat byl czytelniejszy
 				PRZYSZLOSCIOWO <- zrobic walidacje peselu tak aby zgadzala sie suma kontrolna itd
 				*/
 				--VALIDATE DATE_ADD
-				NULL;
 			END IF;
 		END IF;   
 		--sprawdzenie co jest w v_flag
 		v_show_bool:=CASE WHEN (sys.diutil.bool_to_int(v_flag)) = 1 THEN 'TRUE'
-						WHEN (sys.diutil.bool_to_int(v_flag)) = 0 THEN  'FALSE'
+						  WHEN (sys.diutil.bool_to_int(v_flag)) = 0 THEN  'FALSE'
 		END;  
 		dbms_output.put_line(v_show_bool);
     END f_validate_client;
@@ -106,7 +111,7 @@ create or replace PACKAGE BODY PKG_ADD_CLIENT AS
         RETURN v_flag;
     END f_validate_client_firm;
 
-        PROCEDURE r_make_insert IS 
+    PROCEDURE r_make_insert IS 
 	BEGIN 
 		NULL;
 	END r_make_insert;

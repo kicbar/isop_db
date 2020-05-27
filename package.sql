@@ -8,7 +8,7 @@ create or replace PACKAGE PKG_ADD_CLIENT AS
     ------------------------------------------------------------------------------------------------------
     */
     
-    FUNCTION f_client_exist ( v_pesel_in NUMBER) RETURN BOOLEAN;
+    FUNCTION f_client_exist (v_pesel_in NUMBER) RETURN BOOLEAN;
     /*
     Ta funkcja sprawdza czy dla danego użytkownika isnieja klienci o wskazanym numerze pesel. 
     ------------------------------------------------------------------------------------------------------
@@ -17,7 +17,7 @@ create or replace PACKAGE PKG_ADD_CLIENT AS
     2.0.27.05    27/05/2020   b.kicior   Usunięcie powiązania z userem.
     ------------------------------------------------------------------------------------------------------
     */
-    PROCEDURE r_insert_client;
+    PROCEDURE r_insert_client(v_fname clients.fname%type, v_lname clients.lname%type, v_pesel clients.pesel%type);
     /*
     Ta procedura odpowiada za wprowadzenie danych do bazy.
     ------------------------------------------------------------------------------------------------------
@@ -65,7 +65,7 @@ create or replace PACKAGE PKG_ADD_CLIENT AS
     1.0.20/04    20/04/2020   b.kicior   Utworzenie procedury. 
     ------------------------------------------------------------------------------------------------------
     */
-    FUNCTION f_validate_client(v_fname_client clients.fname%type, v_lname_client clients.lname%type) RETURN BOOLEAN;
+    FUNCTION f_validate_client(v_fname_client clients.fname%type, v_lname_client clients.lname%type, , v_pesel_client clients.pesel%type) RETURN BOOLEAN;
     /*
     Ta funkcja sprawdza poprawność wprowadzanych danych.
     ------------------------------------------------------------------------------------------------------
@@ -99,7 +99,7 @@ create or replace PACKAGE PKG_ADD_CLIENT AS
     */
     PROCEDURE r_make_insert;
     /*
-    Ta funkcja wykonuje pozostale.
+    Ta procedura wykonuje pozostale.
     ------------------------------------------------------------------------------------------------------
     VERSION      DATE         AUTHOR     DESCRIPTION
     1.0.20/04    20/04/2020   b.kicior   Utworzenie funkcji. 
