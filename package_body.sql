@@ -42,9 +42,18 @@ create or replace PACKAGE BODY PKG_ADD_CLIENT AS
         END IF;
 	END r_insert_client;
 
-    PROCEDURE r_insert_client_contact IS 
+    PROCEDURE r_insert_client_contact (v_email contacts.email%type, v_tel_1 contacts.tel_1%type, v_tel_2 contacts.tel_2%type DEFAULT NULL, v_id_client contacts.id_contact%type) IS 
+        inserts_count    INTEGER := 0;
+        validate_return  BOOLEAN;
 	BEGIN 
-		NULL;
+        validate_return := f_validate_client_contact(v_email, v_tel_1, v_tel_2);
+        IF validate_return = TRUE THEN
+            INSERT INTO CONTACTS(email, tel_1, tel_2, id_client) VALUES(v_email, v_tel_1, v_tel_2, v_id_client);
+            inserts_count := inserts_count + SQL%ROWCOUNT;
+            DBMS_OUTPUT.PUT_LINE('Inserted ' || inserts_count || ' rows into CONTACTS table.');
+        ELSE 
+            DBMS_OUTPUT.PUT_LINE('INSERT NOT EXECUTED! VALIDATE CLIENT RETURN FALSE. ');
+        END IF;
 	END r_insert_client_contact;
 
     PROCEDURE r_insert_client_address IS 
@@ -104,7 +113,7 @@ create or replace PACKAGE BODY PKG_ADD_CLIENT AS
         RETURN v_flag;
     END f_validate_client;
 
-    FUNCTION f_validate_client_contact(v_email contacts.email%type, v_tel_1 contacts.tel_1%type) RETURN BOOLEAN IS
+    FUNCTION f_validate_client_contact(v_email contacts.email%type, v_tel_1 contacts.tel_1%type, v_tel_2 contacts.tel_2%type DEFAULT NULL) RETURN BOOLEAN IS
         v_flag BOOLEAN := TRUE;
         v_tel_length   INTEGER;
         v_email_length INTEGER;
@@ -117,6 +126,15 @@ create or replace PACKAGE BODY PKG_ADD_CLIENT AS
         ELSE 
             DBMS_OUTPUT.PUT_LINE('TELEFON OK.');
         END IF;
+        IF v_tel_2 IS NOT NULL THEN 
+            v_tel_length := LENGTH(v_tel_2);
+            IF 9 > v_tel_length OR v_tel_length > 12  THEN
+                DBMS_OUTPUT.PUT_LINE('TELEFON ZLY.');
+                v_flag := FALSE;
+            ELSE 
+                DBMS_OUTPUT.PUT_LINE('TELEFON OK.');
+            END IF;
+        END IF;        
         IF  REGEXP_LIKE (v_email,'^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,4}$') THEN
             DBMS_OUTPUT.PUT_LINE('EMAIL DOBRY.');
         ELSE 
@@ -139,7 +157,12 @@ create or replace PACKAGE BODY PKG_ADD_CLIENT AS
         NULL;
         RETURN v_flag;
     END f_validate_client_firm;
-
+    
+    FUNCTION f_get_id_client(v_fname clients.fname%type, v_lname clients.lname%type, v_pesel clients.pesel%type) RETURN INTEGER IS
+    BEGIN
+        NULL;
+    END f_get_id_client;
+    
     PROCEDURE r_make_insert IS 
 	BEGIN 
 		NULL;

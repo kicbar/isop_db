@@ -25,7 +25,7 @@ create or replace PACKAGE PKG_ADD_CLIENT AS
     1.0.20/04    20/04/2020   b.kicior   Utworzenie procedury. 
     ------------------------------------------------------------------------------------------------------
     */
-    PROCEDURE r_insert_client_contact;
+    PROCEDURE r_insert_client_contact(v_email contacts.email%type, v_tel_1 contacts.tel_1%type, v_tel_2 contacts.tel_2%type DEFAULT NULL, v_id_client contacts.id_contact%type);
     /*
     Ta procedura odpowiada za wprowadzenie danych do bazy.
     ------------------------------------------------------------------------------------------------------
@@ -73,7 +73,7 @@ create or replace PACKAGE PKG_ADD_CLIENT AS
     1.0.20/04    20/04/2020   b.kicior   Utworzenie funkcji. 
     ------------------------------------------------------------------------------------------------------
     */
-    FUNCTION f_validate_client_contact(v_email contacts.email%type, v_tel_1 contacts.tel_1%type) RETURN BOOLEAN;
+    FUNCTION f_validate_client_contact(v_email contacts.email%type, v_tel_1 contacts.tel_1%type, v_tel_2 contacts.tel_2%type DEFAULT NULL) RETURN BOOLEAN;
     /*
     Ta funkcja sprawdza poprawność wprowadzanych danych.
     ------------------------------------------------------------------------------------------------------
@@ -95,6 +95,14 @@ create or replace PACKAGE PKG_ADD_CLIENT AS
     ------------------------------------------------------------------------------------------------------
     VERSION      DATE         AUTHOR     DESCRIPTION
     1.0.20/04    20/04/2020   b.kicior   Utworzenie funkcji. 
+    ------------------------------------------------------------------------------------------------------
+    */
+    FUNCTION f_get_id_client(v_fname clients.fname%type, v_lname clients.lname%type, v_pesel clients.pesel%type) RETURN INTEGER;
+    /*
+    Ta funkcja sprawdza poprawność wprowadzanych danych.
+    ------------------------------------------------------------------------------------------------------
+    VERSION      DATE         AUTHOR     DESCRIPTION
+    1.0.30/05    30/05/2020   b.kicior   Utworzenie funkcji. 
     ------------------------------------------------------------------------------------------------------
     */
     PROCEDURE r_make_insert;
