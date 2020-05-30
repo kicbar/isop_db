@@ -7,7 +7,7 @@ create or replace PACKAGE PKG_ADD_CLIENT AS
     1.0.20/04    20/04/2020   b.kicior   Utworzenie pakietu. 
     ------------------------------------------------------------------------------------------------------
     */
-    
+
     FUNCTION f_client_exist (v_pesel_in NUMBER) RETURN BOOLEAN;
     /*
     Ta funkcja sprawdza czy dla danego użytkownika isnieja klienci o wskazanym numerze pesel. 
@@ -73,7 +73,7 @@ create or replace PACKAGE PKG_ADD_CLIENT AS
     1.0.20/04    20/04/2020   b.kicior   Utworzenie funkcji. 
     ------------------------------------------------------------------------------------------------------
     */
-    FUNCTION f_validate_client_contact RETURN BOOLEAN;
+    FUNCTION f_validate_client_contact(v_email contacts.email%type, v_tel_1 contacts.tel_1%type) RETURN BOOLEAN;
     /*
     Ta funkcja sprawdza poprawność wprowadzanych danych.
     ------------------------------------------------------------------------------------------------------

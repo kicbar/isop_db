@@ -25,7 +25,7 @@ create or replace PACKAGE BODY PKG_ADD_CLIENT AS
     		END IF;
         CLOSE c_client_search;
     END f_client_exist;
-    
+
     PROCEDURE r_insert_client(v_fname clients.fname%type, v_lname clients.lname%type, v_pesel clients.pesel%type) IS
     	inserts_count    INTEGER := 0;
         validate_return  BOOLEAN;
@@ -41,7 +41,7 @@ create or replace PACKAGE BODY PKG_ADD_CLIENT AS
             DBMS_OUTPUT.PUT_LINE('INSERT NOT EXECUTED! VALIDATE CLIENT RETURN FALSE. ');
         END IF;
 	END r_insert_client;
-    
+
     PROCEDURE r_insert_client_contact IS 
 	BEGIN 
 		NULL;
@@ -104,10 +104,25 @@ create or replace PACKAGE BODY PKG_ADD_CLIENT AS
         RETURN v_flag;
     END f_validate_client;
 
-	FUNCTION f_validate_client_contact RETURN BOOLEAN IS
+    FUNCTION f_validate_client_contact(v_email contacts.email%type, v_tel_1 contacts.tel_1%type) RETURN BOOLEAN IS
         v_flag BOOLEAN := TRUE;
+        v_tel_length   INTEGER;
+        v_email_length INTEGER;
     BEGIN 
-        NULL;
+        /*zmienic pole telefon na varchar2*/
+        v_tel_length := LENGTH(v_tel_1);
+        IF 9 > v_tel_length OR v_tel_length > 12  THEN
+            DBMS_OUTPUT.PUT_LINE('TELEFON ZLY.');
+            v_flag := FALSE;
+        ELSE 
+            DBMS_OUTPUT.PUT_LINE('TELEFON OK.');
+        END IF;
+        IF  REGEXP_LIKE (v_email,'^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,4}$') THEN
+            DBMS_OUTPUT.PUT_LINE('EMAIL DOBRY.');
+        ELSE 
+            DBMS_OUTPUT.PUT_LINE('Email ZŁY.');
+            v_flag := FALSE;
+        END IF;
         RETURN v_flag;
     END f_validate_client_contact;
 
