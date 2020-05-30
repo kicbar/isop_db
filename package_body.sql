@@ -154,10 +154,15 @@ create or replace PACKAGE BODY PKG_ADD_CLIENT AS
     FUNCTION f_get_id_client(v_pesel clients.pesel%type) RETURN INTEGER IS
         v_id_client NUMBER;
     BEGIN
+        IF f_validate_pesel(v_pesel) THEN 
         SELECT id_client 
           INTO v_id_client
           FROM clients 
          WHERE pesel = v_pesel;
+        RETURN v_id_client;
+        ELSE 
+            DBMS_OUTPUT.PUT_LINE('Wrong Pesel Validation.');
+        END IF;
         EXCEPTION 
             /*mozna zakodowac bledy kazdemu podac inna wartosc i sprawdzac co zwraca przy zworceniu
               musialby byc to liczby ujemne zeby nie kolidowac z idkami
