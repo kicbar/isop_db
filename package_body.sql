@@ -158,27 +158,27 @@ create or replace PACKAGE BODY PKG_ADD_CLIENT AS
         RETURN v_flag;
     END f_validate_client_firm;
     
-    FUNCTION f_get_id_client(v_pesel clients.pesel%type) RETURN INTEGER IS
+  FUNCTION f_get_id_client(v_pesel clients.pesel%type) RETURN INTEGER IS
         v_id_client NUMBER;
-        CURSOR c_get_id_client IS
-            SELECT id_client 
-              FROM clients 
-             WHERE pesel = v_pesel;
     BEGIN
-        OPEN c_get_id_client;
-        FETCH c_get_id_client INTO v_id_client;
-        CLOSE c_get_id_client;
-        IF c_get_id_client%FOUND THEN
-            DBMS_OUTPUT.PUT_LINE('Znaleziono klienta o id: '||v_id_client);
-            RETURN v_id_client;
-        ELSE
-            DBMS_OUTPUT.PUT_LINE('Nie znaleziono klienta dla podanego numeru pesel');
-        END IF;
+        SELECT id_client 
+          INTO v_id_client
+          FROM clients 
+         WHERE pesel = v_pesel;
         EXCEPTION 
+            /*mozna zakodowac bledy kazdemu podac inna wartosc i sprawdzac co zwraca przy zworceniu
+              musialby byc to liczby ujemne zeby nie kolidowac z idkami
+              mozna tez wykorzystac SQLCODE
+             */
             WHEN NO_DATA_FOUND THEN
                 DBMS_OUTPUT.PUT_LINE('Client for pesel '||v_pesel||' not found. CODE ERROR: '|| SQLERRM);
+                RETURN 0;
+            WHEN TOO_MANY_ROWS THEN
+                DBMS_OUTPUT.PUT_LINE('Numbers of clients for pesel '||v_pesel||' is too big. CODE ERROR: '|| SQLERRM);
+                RETURN 0;
             WHEN OTHERS THEN
                 DBMS_OUTPUT.PUT_LINE('Other error happened. CODE ERROR: '|| SQLERRM);
+                RETURN 0;
     END f_get_id_client;
     
     PROCEDURE r_make_insert IS 
