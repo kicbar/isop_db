@@ -92,17 +92,10 @@ create or replace PACKAGE BODY PKG_ADD_CLIENT AS
 				v_flag := FALSE;
 			ELSE 
 				--VALIDATE PESEL
-				IF LENGTH(v_pesel_client) != 11 THEN
-                	v_flag := FALSE;
-                	DBMS_OUTPUT.PUT_LINE('ERROR PESEL! YOUR PESEL MUST HAVE 11 DIGITS.'); 
-                ELSE
-                    DBMS_OUTPUT.PUT_LINE('VALIDATION SUCCESFUL.'); 
+                IF f_validate_pesel(v_pesel_client) THEN 
+                    NULL;
                 END IF;
-				/*Przyjmuje na ta chwile ze peselu nie trzeba walidowac
-				Pole jest typu INTEGER wiec i tak sie wywali, nalezaloby jednak przechwywcic ten wyjatek i sprawic zeby komunikat byl czytelniejszy
-				PRZYSZLOSCIOWO <- zrobic walidacje peselu tak aby zgadzala sie suma kontrolna itd
-				*/
-				--VALIDATE DATE_ADD
+                DBMS_OUTPUT.PUT_LINE('VALIDATION SUCCESFUL.'); 
 			END IF;
 		END IF;   
 		--sprawdzenie co jest w v_flag
@@ -158,7 +151,7 @@ create or replace PACKAGE BODY PKG_ADD_CLIENT AS
         RETURN v_flag;
     END f_validate_client_firm;
     
-  FUNCTION f_get_id_client(v_pesel clients.pesel%type) RETURN INTEGER IS
+    FUNCTION f_get_id_client(v_pesel clients.pesel%type) RETURN INTEGER IS
         v_id_client NUMBER;
     BEGIN
         SELECT id_client 
@@ -180,6 +173,27 @@ create or replace PACKAGE BODY PKG_ADD_CLIENT AS
                 DBMS_OUTPUT.PUT_LINE('Other error happened. CODE ERROR: '|| SQLERRM);
                 RETURN 0;
     END f_get_id_client;
+    
+    FUNCTION f_validate_pesel(v_pesel clients.pesel%type) RETURN BOOLEAN IS
+        v_flag BOOLEAN := TRUE;
+    BEGIN
+        IF LENGTH(v_pesel) != 11 THEN
+            v_flag := FALSE;
+            DBMS_OUTPUT.PUT_LINE('ERROR PESEL! YOUR PESEL MUST HAVE 11 DIGITS.'); 
+        ELSE
+            IF LENGTH(TRIM(TRANSLATE(v_pesel, '0123456789',' '))) > 0 THEN
+                DBMS_OUTPUT.PUT_LINE('ERROR PESEL! USE ONLY DIGITS.');
+                v_flag := FALSE;
+            ELSE
+                DBMS_OUTPUT.PUT_LINE('VALIDATION PESEL SUCCESFUL.'); 
+            END IF;
+        END IF;
+        /*Przyjmuje na ta chwile ze peselu nie trzeba walidowac
+        Pole jest typu INTEGER wiec i tak sie wywali, nalezaloby jednak przechwywcic ten wyjatek i sprawic zeby komunikat byl czytelniejszy
+        PRZYSZLOSCIOWO <- zrobic walidacje peselu tak aby zgadzala sie suma kontrolna itd
+        */
+        RETURN v_flag;
+    END f_validate_pesel;
     
     PROCEDURE r_make_insert IS 
 	BEGIN 

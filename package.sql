@@ -97,7 +97,15 @@ create or replace PACKAGE PKG_ADD_CLIENT AS
     1.0.20/04    20/04/2020   b.kicior   Utworzenie funkcji. 
     ------------------------------------------------------------------------------------------------------
     */
-    FUNCTION f_get_id_client(v_fname clients.fname%type, v_lname clients.lname%type, v_pesel clients.pesel%type) RETURN INTEGER;
+    FUNCTION f_get_id_client(v_pesel clients.pesel%type) RETURN INTEGER;
+    /*
+    Ta funkcja sprawdza poprawność wprowadzanych danych.
+    ------------------------------------------------------------------------------------------------------
+    VERSION      DATE         AUTHOR     DESCRIPTION
+    1.0.30/05    30/05/2020   b.kicior   Utworzenie funkcji. 
+    ------------------------------------------------------------------------------------------------------
+    */
+    FUNCTION f_validate_pesel(v_pesel clients.pesel%type) RETURN BOOLEAN;
     /*
     Ta funkcja sprawdza poprawność wprowadzanych danych.
     ------------------------------------------------------------------------------------------------------
