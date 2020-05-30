@@ -87,8 +87,3 @@ create sequence log_seq
 start with 1 increment by 1
 MINVALUE 1 MAXVALUE 100000
 CYCLE CACHE 2 ORDER;
-
-create sequence log_seq2
-start with 1 increment by 1
-MINVALUE 1 MAXVALUE 100000
-CYCLE CACHE 2 ORDER;
