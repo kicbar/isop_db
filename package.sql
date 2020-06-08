@@ -1,4 +1,4 @@
-create or replace PACKAGE PKG_ADD_CLIENT AS 
+create or replace NONEDITIONABLE PACKAGE PKG_ADD_CLIENT AS 
     /*
     Ten pakiet odpowiada za wprowadzanie klientów do systemu. 
 	Przeprowadza walidacje oraz insertuje dane.
@@ -8,7 +8,7 @@ create or replace PACKAGE PKG_ADD_CLIENT AS
     ------------------------------------------------------------------------------------------------------
     */
 
-    FUNCTION f_client_exist (v_pesel_in NUMBER) RETURN BOOLEAN;
+    FUNCTION f_client_exist (v_pesel_in clients.pesel%TYPE) RETURN BOOLEAN;
     /*
     Ta funkcja sprawdza czy dla danego użytkownika isnieja klienci o wskazanym numerze pesel. 
     ------------------------------------------------------------------------------------------------------
@@ -17,7 +17,7 @@ create or replace PACKAGE PKG_ADD_CLIENT AS
     2.0.27.05    27/05/2020   b.kicior   Usunięcie powiązania z userem.
     ------------------------------------------------------------------------------------------------------
     */
-    PROCEDURE r_insert_client(v_fname clients.fname%type, v_lname clients.lname%type, v_pesel clients.pesel%type);
+    PROCEDURE r_insert_client(v_fname_in clients.fname%type, v_lname_in clients.lname%type, v_pesel_in clients.pesel%type);
     /*
     Ta procedura odpowiada za wprowadzenie danych do bazy.
     ------------------------------------------------------------------------------------------------------
@@ -105,21 +105,12 @@ create or replace PACKAGE PKG_ADD_CLIENT AS
     1.0.30/05    30/05/2020   b.kicior   Utworzenie funkcji. 
     ------------------------------------------------------------------------------------------------------
     */
-    FUNCTION f_get_client(v_pesel clients.pesel%type, v_fname clients.fname%type, v_lname clients.lname%type) RETURN clients%rowtype;
-    /*
-    Ta funkcja sprawdza pobiera dane clienta.
-    Wykorzystuje dynamiczny SQL.
-    ------------------------------------------------------------------------------------------------------
-    VERSION      DATE         AUTHOR     DESCRIPTION
-    1.0.30/05    30/05/2020   b.kicior   Utworzenie funkcji. 
-    ------------------------------------------------------------------------------------------------------
-    */
     FUNCTION f_validate_pesel(v_pesel clients.pesel%type) RETURN BOOLEAN;
     /*
     Ta funkcja sprawdza poprawność wprowadzanych danych.
     ------------------------------------------------------------------------------------------------------
     VERSION      DATE         AUTHOR     DESCRIPTION
-    1.0.04/06    04/06/2020   b.kicior   Utworzenie funkcji. 
+    1.0.30/05    30/05/2020   b.kicior   Utworzenie funkcji. 
     ------------------------------------------------------------------------------------------------------
     */
     PROCEDURE r_make_insert;

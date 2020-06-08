@@ -3,7 +3,7 @@ CREATE OR REPLACE PACKAGE BODY PKG_ADD_CLIENT AS
     FUNCTION f_validate_pesel(v_pesel clients.pesel%type) RETURN BOOLEAN IS
         v_flag BOOLEAN := TRUE;
     BEGIN
-        IF LENGTH(v_pesel) != 11 THEN
+        IF LENGTH(TRIM(v_pesel)) != 11 THEN
             v_flag := FALSE;
             DBMS_OUTPUT.PUT_LINE('ERROR PESEL! Pesel must have 11 digits. Return value: FALSE'); 
         ELSE
@@ -21,10 +21,9 @@ CREATE OR REPLACE PACKAGE BODY PKG_ADD_CLIENT AS
         RETURN v_flag;
     END f_validate_pesel;
     
-    FUNCTION f_client_exist(v_pesel_in NUMBER) RETURN BOOLEAN 
+    FUNCTION f_client_exist(v_pesel_in clients.pesel%TYPE) RETURN BOOLEAN 
     IS
         v_flag_out        BOOLEAN;
-        v_temp_client     clients%ROWTYPE;
         v_clients_numbers NUMBER;
     BEGIN
         v_flag_out := f_validate_pesel(v_pesel_in);
@@ -53,7 +52,7 @@ CREATE OR REPLACE PACKAGE BODY PKG_ADD_CLIENT AS
     FUNCTION f_validate_client(v_fname_client clients.fname%type, v_lname_client clients.lname%type, v_pesel_client clients.pesel%type) RETURN BOOLEAN IS
 		v_flag      BOOLEAN;
 		v_show_bool VARCHAR2(10);
-		v_alphabet  VARCHAR2(100) := 'aąbcćdeęfghijklłmnńoópqrsśtuvwxyzźż-';
+		v_alphabet  VARCHAR2(100) := UPPER('aąbcćdeęfghijklłmnńoópqrsśtuvwxyzźż-');
 	BEGIN 
         v_flag := f_client_exist(v_pesel_client);
         IF v_flag = TRUE THEN
@@ -82,13 +81,19 @@ CREATE OR REPLACE PACKAGE BODY PKG_ADD_CLIENT AS
         RETURN v_flag;
     END f_validate_client;
 
-    PROCEDURE r_insert_client(v_fname clients.fname%type, v_lname clients.lname%type, v_pesel clients.pesel%type) IS
+    PROCEDURE r_insert_client(v_fname_in clients.fname%type, v_lname_in clients.lname%type, v_pesel_in clients.pesel%type) IS
     	inserts_count    INTEGER := 0;
         validate_return  BOOLEAN;
+        v_pesel clients.pesel%type;
+        v_fname clients.fname%type;
+        v_lname clients.lname%type;
 	BEGIN
+        v_pesel := UPPER(TRIM(v_pesel_in));
+        v_fname := UPPER(TRIM(v_fname_in));        
+        v_lname := UPPER(TRIM(v_lname_in));
         validate_return := f_validate_client(v_fname, v_lname, v_pesel);
         IF validate_return = TRUE THEN
-            INSERT INTO CLIENTS(fname, lname, pesel) VALUES(trim(v_fname), trim(v_lname), trim(v_pesel));
+            INSERT INTO CLIENTS(fname, lname, pesel) VALUES(v_fname, v_lname, v_pesel);
             inserts_count := inserts_count + SQL%ROWCOUNT;
             DBMS_OUTPUT.PUT_LINE('Inserted ' || inserts_count || ' rows into CLIENTS table.');
         ELSE 
