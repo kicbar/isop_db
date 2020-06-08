@@ -1,5 +1,44 @@
 CREATE OR REPLACE PACKAGE BODY PKG_ADD_CLIENT AS
 
+    FUNCTION f_get_client(v_pesel clients.pesel%type DEFAULT NULL, v_fname clients.fname%type DEFAULT NULL, v_lname clients.lname%type DEFAULT NULL) RETURN clients%rowtype IS
+        /* TO RUN
+        declare 
+            v_temp clients%rowtype;
+        begin 
+            v_temp := pkg_add_client.f_get_client(v_lname  => 'Makowski', v_fname  => 'Kuba');
+            DBMS_OUTPUT.PUT_LINE('PESEL: '|| v_temp.pesel);
+        end; */
+        r_client clients%rowtype;
+        v_query_get_client VARCHAR2(200);
+    BEGIN
+        v_query_get_client := 'SELECT *
+                                 FROM clients
+                                WHERE status = 1';
+        IF v_fname IS NOT NULL THEN
+            v_query_get_client := v_query_get_client || ' AND fname = ' || ''''||v_fname||''''; 
+        END IF;
+        
+        IF v_lname IS NOT NULL THEN
+            v_query_get_client := v_query_get_client || ' AND lname = ' || ''''||v_lname||'''';
+        END IF;
+        
+        IF v_pesel IS NOT NULL THEN     
+            v_query_get_client := v_query_get_client || ' AND pesel = ' || ''''||v_pesel||'''' ;    
+        END IF;
+        /*TRZEBA OBSŁUŻYĆ SYTUACJE W KTÓREJ NIC NIE ZWRACA*/
+        EXECUTE IMMEDIATE v_query_get_client INTO r_client;
+        RETURN r_client;
+        
+        EXCEPTION
+            WHEN NO_DATA_FOUND THEN
+                DBMS_OUTPUT.PUT_LINE('Client for data: '||v_pesel||' '|| v_fname || ' ' || v_lname ||' not found. CODE ERROR: '|| SQLERRM);
+            WHEN TOO_MANY_ROWS THEN
+                DBMS_OUTPUT.PUT_LINE('Numbers of clients for data: '||v_pesel|| ' ' || v_fname ||' '|| v_lname ||' is too big. CODE ERROR: '|| SQLERRM);
+            WHEN OTHERS THEN
+                --DBMS_OUTPUT.PUT_LINE('Other error happened. CODE ERROR: '|| SQLERRM);
+                raise_application_error(-20001,'An error was encountered - '||SQLCODE||' -ERROR- '||SQLERRM);
+    END f_get_client;
+
     FUNCTION f_validate_pesel(v_pesel clients.pesel%type) RETURN BOOLEAN IS
         v_flag BOOLEAN := TRUE;
     BEGIN
@@ -25,6 +64,7 @@ CREATE OR REPLACE PACKAGE BODY PKG_ADD_CLIENT AS
     IS
         v_flag_out        BOOLEAN;
         v_clients_numbers NUMBER;
+        r_clients_exist   clients%ROWTYPE;
     BEGIN
         v_flag_out := f_validate_pesel(v_pesel_in);
         IF v_flag_out = TRUE THEN 
@@ -35,18 +75,15 @@ CREATE OR REPLACE PACKAGE BODY PKG_ADD_CLIENT AS
                AND status = 1;
     		IF v_clients_numbers > 0 THEN
                 DBMS_OUTPUT.PUT_LINE('Client already exist. Return value: FALSE');
-                /*TUTAJ MOŻNA POBRAĆ I POKAZAĆ ISTNIEJĄCEGO KLIENTA
-                  NIE BEDZIE PROBLEMU W PRZYPADKU SKORZYSTANIA Z f_get_client bo mam pewnośc ze ten klient istnieje!
-                */
                 v_flag_out := FALSE;
-    			RETURN v_flag_out;
+                r_clients_exist := f_get_client(v_pesel => v_pesel_in);
+                DBMS_OUTPUT.PUT_LINE('| '||r_clients_exist.id_client||' | '||r_clients_exist.fname||' | '||r_clients_exist.lname||' | '||r_clients_exist.pesel||' | '|| r_clients_exist.insert_date);   
     		ELSE
                 DBMS_OUTPUT.PUT_LINE('Client not exist. Return value: TRUE');
-    			RETURN v_flag_out;
+    			
     		END IF;
-        ELSE 
-            RETURN v_flag_out;
         END IF;
+        RETURN v_flag_out;
     END f_client_exist;
 
     FUNCTION f_validate_client(v_fname_client clients.fname%type, v_lname_client clients.lname%type, v_pesel_client clients.pesel%type) RETURN BOOLEAN IS
@@ -206,45 +243,6 @@ CREATE OR REPLACE PACKAGE BODY PKG_ADD_CLIENT AS
                 DBMS_OUTPUT.PUT_LINE('Other error happened. CODE ERROR: '|| SQLERRM);
                 RETURN 0;
     END f_get_id_client;
-
-    FUNCTION f_get_client(v_pesel clients.pesel%type DEFAULT NULL, v_fname clients.fname%type DEFAULT NULL, v_lname clients.lname%type DEFAULT NULL) RETURN clients%rowtype IS
-        /* TO RUN
-        declare 
-            v_temp clients%rowtype;
-        begin 
-            v_temp := pkg_add_client.f_get_client(v_lname  => 'Makowski', v_fname  => 'Kuba');
-            DBMS_OUTPUT.PUT_LINE('PESEL: '|| v_temp.pesel);
-        end; */
-        r_client clients%rowtype;
-        v_query_get_client VARCHAR2(200);
-    BEGIN
-        v_query_get_client := 'SELECT *
-                                 FROM clients
-                                WHERE status = 1';
-        IF v_fname IS NOT NULL THEN
-            v_query_get_client := v_query_get_client || ' AND fname = ' || ''''||v_fname||''''; 
-        END IF;
-        
-        IF v_lname IS NOT NULL THEN
-            v_query_get_client := v_query_get_client || ' AND lname = ' || ''''||v_lname||'''';
-        END IF;
-        
-        IF v_pesel IS NOT NULL THEN     
-            v_query_get_client := v_query_get_client || ' AND pesel = ' || ''''||v_pesel||'''' ;    
-        END IF;
-        /*TRZEBA OBSŁUŻYĆ SYTUACJE W KTÓREJ NIC NIE ZWRACA*/
-        EXECUTE IMMEDIATE v_query_get_client INTO r_client;
-        RETURN r_client;
-        
-        EXCEPTION
-            WHEN NO_DATA_FOUND THEN
-                DBMS_OUTPUT.PUT_LINE('Client for data: '||v_pesel||' '|| v_fname || ' ' || v_lname ||' not found. CODE ERROR: '|| SQLERRM);
-            WHEN TOO_MANY_ROWS THEN
-                DBMS_OUTPUT.PUT_LINE('Numbers of clients for data: '||v_pesel|| ' ' || v_fname ||' '|| v_lname ||' is too big. CODE ERROR: '|| SQLERRM);
-            WHEN OTHERS THEN
-                --DBMS_OUTPUT.PUT_LINE('Other error happened. CODE ERROR: '|| SQLERRM);
-                raise_application_error(-20001,'An error was encountered - '||SQLCODE||' -ERROR- '||SQLERRM);
-    END f_get_client;
 
     PROCEDURE r_make_insert IS 
 	BEGIN 
