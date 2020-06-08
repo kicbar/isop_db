@@ -8,8 +8,8 @@ create or replace PACKAGE BODY PKG_ADD_CLIENT AS
               FROM clients
              WHERE pesel = v_pesel_in
                AND status = 1;
-        v_flag_out boolean := FALSE;
-        v_temp_client   clients%rowtype; --TO ZMIENIC NA VAARAY
+        v_flag_out      boolean := FALSE;
+        v_temp_client   clients%rowtype;
     BEGIN
         OPEN c_client_search;
         FETCH c_client_search INTO v_temp_client;
@@ -34,7 +34,7 @@ create or replace PACKAGE BODY PKG_ADD_CLIENT AS
         validate_return := f_validate_client(v_fname, v_lname, v_pesel);
         exist_return := f_client_exist(v_pesel);
         IF validate_return = TRUE AND exist_return = TRUE THEN
-            INSERT INTO CLIENTS(fname, lname, pesel) VALUES(v_fname, v_lname, v_pesel);
+            INSERT INTO CLIENTS(fname, lname, pesel) VALUES(trim(v_fname), trim(v_lname), v_pesel);
             inserts_count := inserts_count + SQL%ROWCOUNT;
             DBMS_OUTPUT.PUT_LINE('Inserted ' || inserts_count || ' rows into CLIENTS table.');
         ELSE 
@@ -111,7 +111,6 @@ create or replace PACKAGE BODY PKG_ADD_CLIENT AS
         v_tel_length   INTEGER;
         v_email_length INTEGER;
     BEGIN 
-        /*zmienic pole telefon na varchar2*/
         v_tel_length := LENGTH(v_tel_1);
         IF 9 > v_tel_length OR v_tel_length > 12  THEN
             DBMS_OUTPUT.PUT_LINE('TELEFON ZLY.');
@@ -150,7 +149,7 @@ create or replace PACKAGE BODY PKG_ADD_CLIENT AS
         NULL;
         RETURN v_flag;
     END f_validate_client_firm;
-    
+
     FUNCTION f_get_id_client(v_pesel clients.pesel%type) RETURN INTEGER IS
         v_id_client NUMBER;
     BEGIN
@@ -178,7 +177,53 @@ create or replace PACKAGE BODY PKG_ADD_CLIENT AS
                 DBMS_OUTPUT.PUT_LINE('Other error happened. CODE ERROR: '|| SQLERRM);
                 RETURN 0;
     END f_get_id_client;
-    
+
+    FUNCTION f_get_client(v_pesel clients.pesel%type, v_fname clients.fname%type DEFAULT NULL, v_lname clients.lname%type DEFAULT NULL) RETURN clients%rowtype IS
+        r_client clients%rowtype;
+        CURSOR c_get_client IS
+            SELECT *
+              FROM clients
+             WHERE pesel = v_pesel
+               AND status = 1;
+    BEGIN
+        IF v_fname IS NOT NULL THEN
+            IF v_lname IS NOT NULL THEN
+                SELECT * 
+                  INTO r_client 
+                  FROM clients
+                 WHERE pesel = v_pesel
+                   AND fname = v_fname 
+                   AND lname = v_lname
+                   AND status = 1;
+            ELSE 
+                SELECT * 
+                  INTO r_client 
+                  FROM clients
+                 WHERE pesel = v_pesel
+                   AND lname = v_lname
+                   AND status = 1;                 
+            END IF;
+        ELSE 
+--            SELECT * 
+--              INTO r_client 
+--              FROM clients
+--             WHERE status = 1;  
+            OPEN c_get_client;
+            FETCH c_get_client INTO r_client;
+            CLOSE c_get_client;
+        END IF; 
+
+        RETURN r_client;
+        EXCEPTION
+            WHEN NO_DATA_FOUND THEN
+                DBMS_OUTPUT.PUT_LINE('Client for pesel '||v_pesel||' not found. CODE ERROR: '|| SQLERRM);
+            WHEN TOO_MANY_ROWS THEN
+                DBMS_OUTPUT.PUT_LINE('Numbers of clients for pesel '||v_pesel||' is too big. CODE ERROR: '|| SQLERRM);
+            WHEN OTHERS THEN
+                --DBMS_OUTPUT.PUT_LINE('Other error happened. CODE ERROR: '|| SQLERRM);
+                raise_application_error(-20001,'An error was encountered - '||SQLCODE||' -ERROR- '||SQLERRM);
+    END f_get_client;
+
     FUNCTION f_validate_pesel(v_pesel clients.pesel%type) RETURN BOOLEAN IS
         v_flag BOOLEAN := TRUE;
     BEGIN
@@ -199,7 +244,7 @@ create or replace PACKAGE BODY PKG_ADD_CLIENT AS
         */
         RETURN v_flag;
     END f_validate_pesel;
-    
+
     PROCEDURE r_make_insert IS 
 	BEGIN 
 		NULL;
