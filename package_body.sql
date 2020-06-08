@@ -1,5 +1,26 @@
-create or replace PACKAGE BODY PKG_ADD_CLIENT AS
+CREATE OR REPLACE PACKAGE BODY PKG_ADD_CLIENT AS
 
+    FUNCTION f_validate_pesel(v_pesel clients.pesel%type) RETURN BOOLEAN IS
+        v_flag BOOLEAN := TRUE;
+    BEGIN
+        IF LENGTH(v_pesel) != 11 THEN
+            v_flag := FALSE;
+            DBMS_OUTPUT.PUT_LINE('ERROR PESEL! Pesel must have 11 digits. Return value: FALSE'); 
+        ELSE
+            IF LENGTH(TRIM(TRANSLATE(v_pesel, '0123456789',' '))) > 0 THEN
+                DBMS_OUTPUT.PUT_LINE('ERROR PESEL! Use only digits. Return value: FALSE');
+                v_flag := FALSE;
+            ELSE
+                DBMS_OUTPUT.PUT_LINE('VALIDATION PESEL SUCCESFUL. Return value: TRUE'); 
+            END IF;
+        END IF;
+        /*Przyjmuje na ta chwile ze peselu nie trzeba walidowac
+        Pole jest typu INTEGER wiec i tak sie wywali, nalezaloby jednak przechwywcic ten wyjatek i sprawic zeby komunikat byl czytelniejszy
+        PRZYSZLOSCIOWO <- zrobic walidacje peselu tak aby zgadzala sie suma kontrolna itd
+        */
+        RETURN v_flag;
+    END f_validate_pesel;
+    
     FUNCTION f_client_exist(v_pesel_in NUMBER) RETURN BOOLEAN 
     IS
         v_flag_out        BOOLEAN;
@@ -29,10 +50,41 @@ create or replace PACKAGE BODY PKG_ADD_CLIENT AS
         END IF;
     END f_client_exist;
 
+    FUNCTION f_validate_client(v_fname_client clients.fname%type, v_lname_client clients.lname%type, v_pesel_client clients.pesel%type) RETURN BOOLEAN IS
+		v_flag      BOOLEAN;
+		v_show_bool VARCHAR2(10);
+		v_alphabet  VARCHAR2(100) := 'aąbcćdeęfghijklłmnńoópqrsśtuvwxyzźż-';
+	BEGIN 
+        v_flag := f_client_exist(v_pesel_client);
+        IF v_flag = TRUE THEN
+		    --VALIDATE FNAME
+		    IF  LENGTH(TRIM(TRANSLATE(upper(v_fname_client), upper(v_alphabet),' '))) > 0 THEN
+		    	v_flag := FALSE;
+                DBMS_OUTPUT.PUT_LINE('ERROR FIRST NAME! IN THIS FIELD YOU CAN USE ONLY LETTERS. Return value: FALSE');
+		    ELSE 
+		    	--VALIDATE LNAME
+		    	IF LENGTH(TRIM(TRANSLATE(upper(v_lname_client), upper(v_alphabet),' '))) > 0 THEN
+		    		v_flag := FALSE;
+                    DBMS_OUTPUT.PUT_LINE('ERROR LAST NAME! IN THIS FIELD YOU CAN USE ONLY LETTERS. Return value: FALSE');
+		    	ELSE 
+                    DBMS_OUTPUT.PUT_LINE('FULL VALIDATION SUCCESFUL. Return value: TRUE'); 
+			    END IF;
+		    END IF;   
+        ELSE 
+            RETURN v_flag;
+        END IF;
+		--sprawdzenie co jest w v_flag
+		/* v_show_bool := CASE 
+                            WHEN (sys.diutil.bool_to_int(v_flag)) = 1 THEN 'TRUE'
+					        WHEN (sys.diutil.bool_to_int(v_flag)) = 0 THEN  'FALSE' 
+                            END;
+        dbms_output.put_line('Validate return: ' || v_show_bool); */
+        RETURN v_flag;
+    END f_validate_client;
+
     PROCEDURE r_insert_client(v_fname clients.fname%type, v_lname clients.lname%type, v_pesel clients.pesel%type) IS
     	inserts_count    INTEGER := 0;
         validate_return  BOOLEAN;
-        exist_return     BOOLEAN;
 	BEGIN
         validate_return := f_validate_client(v_fname, v_lname, v_pesel);
         IF validate_return = TRUE THEN
@@ -77,38 +129,6 @@ create or replace PACKAGE BODY PKG_ADD_CLIENT AS
 	BEGIN 
 		NULL;
 	END r_delete_client; 
-
-	FUNCTION f_validate_client(v_fname_client clients.fname%type, v_lname_client clients.lname%type, v_pesel_client clients.pesel%type) RETURN BOOLEAN IS
-		v_flag      BOOLEAN;
-		v_show_bool VARCHAR2(10);
-		v_alphabet  VARCHAR2(100) := 'aąbcćdeęfghijklłmnńoópqrsśtuvwxyzźż-';
-	BEGIN 
-        v_flag := f_client_exist(v_pesel_client);
-        IF v_flag = TRUE THEN
-		    --VALIDATE FNAME
-		    IF  LENGTH(TRIM(TRANSLATE(upper(v_fname_client), upper(v_alphabet),' '))) > 0 THEN
-		    	v_flag := FALSE;
-                DBMS_OUTPUT.PUT_LINE('ERROR FIRST NAME! IN THIS FIELD YOU CAN USE ONLY LETTERS. Return value: FALSE');
-		    ELSE 
-		    	--VALIDATE LNAME
-		    	IF LENGTH(TRIM(TRANSLATE(upper(v_lname_client), upper(v_alphabet),' '))) > 0 THEN
-		    		v_flag := FALSE;
-                    DBMS_OUTPUT.PUT_LINE('ERROR LAST NAME! IN THIS FIELD YOU CAN USE ONLY LETTERS. Return value: FALSE');
-		    	ELSE 
-                    DBMS_OUTPUT.PUT_LINE('FULL VALIDATION SUCCESFUL. Return value: TRUE'); 
-			    END IF;
-		    END IF;   
-        ELSE 
-            RETURN v_flag;
-        END IF;
-		--sprawdzenie co jest w v_flag
-		/* v_show_bool := CASE 
-                            WHEN (sys.diutil.bool_to_int(v_flag)) = 1 THEN 'TRUE'
-					        WHEN (sys.diutil.bool_to_int(v_flag)) = 0 THEN  'FALSE' 
-                            END;
-        dbms_output.put_line('Validate return: ' || v_show_bool); */
-        RETURN v_flag;
-    END f_validate_client;
 
     FUNCTION f_validate_client_contact(v_email contacts.email%type, v_tel_1 contacts.tel_1%type, v_tel_2 contacts.tel_2%type DEFAULT NULL) RETURN BOOLEAN IS
         v_flag BOOLEAN := TRUE;
@@ -220,27 +240,6 @@ create or replace PACKAGE BODY PKG_ADD_CLIENT AS
                 --DBMS_OUTPUT.PUT_LINE('Other error happened. CODE ERROR: '|| SQLERRM);
                 raise_application_error(-20001,'An error was encountered - '||SQLCODE||' -ERROR- '||SQLERRM);
     END f_get_client;
-
-    FUNCTION f_validate_pesel(v_pesel clients.pesel%type) RETURN BOOLEAN IS
-        v_flag BOOLEAN := TRUE;
-    BEGIN
-        IF LENGTH(v_pesel) != 11 THEN
-            v_flag := FALSE;
-            DBMS_OUTPUT.PUT_LINE('ERROR PESEL! Pesel must have 11 digits. Return value: FALSE'); 
-        ELSE
-            IF LENGTH(TRIM(TRANSLATE(v_pesel, '0123456789',' '))) > 0 THEN
-                DBMS_OUTPUT.PUT_LINE('ERROR PESEL! Use only digits. Return value: FALSE');
-                v_flag := FALSE;
-            ELSE
-                DBMS_OUTPUT.PUT_LINE('VALIDATION PESEL SUCCESFUL. Return value: TRUE'); 
-            END IF;
-        END IF;
-        /*Przyjmuje na ta chwile ze peselu nie trzeba walidowac
-        Pole jest typu INTEGER wiec i tak sie wywali, nalezaloby jednak przechwywcic ten wyjatek i sprawic zeby komunikat byl czytelniejszy
-        PRZYSZLOSCIOWO <- zrobic walidacje peselu tak aby zgadzala sie suma kontrolna itd
-        */
-        RETURN v_flag;
-    END f_validate_pesel;
 
     PROCEDURE r_make_insert IS 
 	BEGIN 
