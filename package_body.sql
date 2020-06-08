@@ -2,28 +2,31 @@ create or replace PACKAGE BODY PKG_ADD_CLIENT AS
 
     FUNCTION f_client_exist(v_pesel_in NUMBER) RETURN BOOLEAN 
     IS
-        CURSOR c_client_search 
-        IS
-            SELECT *
+        v_flag_out        BOOLEAN;
+        v_temp_client     clients%ROWTYPE;
+        v_clients_numbers NUMBER;
+    BEGIN
+        v_flag_out := f_validate_pesel(v_pesel_in);
+        IF v_flag_out = TRUE THEN 
+            SELECT COUNT(*)
+              INTO v_clients_numbers
               FROM clients
              WHERE pesel = v_pesel_in
                AND status = 1;
-        v_flag_out      boolean := FALSE;
-        v_temp_client   clients%rowtype;
-    BEGIN
-        OPEN c_client_search;
-        FETCH c_client_search INTO v_temp_client;
-    		IF c_client_search%found THEN
-                --DBMS_OUTPUT.PUT_LINE('FALSE! Client with pesel: ' || v_pesel_in || ' already exist.');
-                DBMS_OUTPUT.PUT_LINE('Client not exist: FALSE');
+    		IF v_clients_numbers > 0 THEN
+                DBMS_OUTPUT.PUT_LINE('Client already exist. Return value: FALSE');
+                /*TUTAJ MOŻNA POBRAĆ I POKAZAĆ ISTNIEJĄCEGO KLIENTA
+                  NIE BEDZIE PROBLEMU W PRZYPADKU SKORZYSTANIA Z f_get_client bo mam pewnośc ze ten klient istnieje!
+                */
+                v_flag_out := FALSE;
     			RETURN v_flag_out;
     		ELSE
-    			v_flag_out := TRUE;
-                DBMS_OUTPUT.PUT_LINE('Client not exist: TRUE');
-                --DBMS_OUTPUT.PUT_LINE('TRUE! Client with pesel: ' || v_pesel_in || ' not exist.');
+                DBMS_OUTPUT.PUT_LINE('Client not exist. Return value: TRUE');
     			RETURN v_flag_out;
     		END IF;
-        CLOSE c_client_search;
+        ELSE 
+            RETURN v_flag_out;
+        END IF;
     END f_client_exist;
 
     PROCEDURE r_insert_client(v_fname clients.fname%type, v_lname clients.lname%type, v_pesel clients.pesel%type) IS
@@ -32,9 +35,8 @@ create or replace PACKAGE BODY PKG_ADD_CLIENT AS
         exist_return     BOOLEAN;
 	BEGIN
         validate_return := f_validate_client(v_fname, v_lname, v_pesel);
-        exist_return := f_client_exist(v_pesel);
-        IF validate_return = TRUE AND exist_return = TRUE THEN
-            INSERT INTO CLIENTS(fname, lname, pesel) VALUES(trim(v_fname), trim(v_lname), v_pesel);
+        IF validate_return = TRUE THEN
+            INSERT INTO CLIENTS(fname, lname, pesel) VALUES(trim(v_fname), trim(v_lname), trim(v_pesel));
             inserts_count := inserts_count + SQL%ROWCOUNT;
             DBMS_OUTPUT.PUT_LINE('Inserted ' || inserts_count || ' rows into CLIENTS table.');
         ELSE 
@@ -77,32 +79,34 @@ create or replace PACKAGE BODY PKG_ADD_CLIENT AS
 	END r_delete_client; 
 
 	FUNCTION f_validate_client(v_fname_client clients.fname%type, v_lname_client clients.lname%type, v_pesel_client clients.pesel%type) RETURN BOOLEAN IS
-		v_flag BOOLEAN := TRUE;
+		v_flag      BOOLEAN;
 		v_show_bool VARCHAR2(10);
-		v_alphabet VARCHAR2(100) := 'aąbcćdeęfghijklłmnńoópqrsśtuvwxyzźż-';
+		v_alphabet  VARCHAR2(100) := 'aąbcćdeęfghijklłmnńoópqrsśtuvwxyzźż-';
 	BEGIN 
-		--VALIDATE FNAME
-		IF  LENGTH(TRIM(TRANSLATE(upper(v_fname_client), upper(v_alphabet),' '))) > 0 THEN
-			v_flag := FALSE;
-            DBMS_OUTPUT.PUT_LINE('ERROR FIRST NAME! IN THIS FIELD YOU CAN USE ONLY LETTERS. ');
-		ELSE 
-			--VALIDATE LNAME
-			IF LENGTH(TRIM(TRANSLATE(upper(v_lname_client), upper(v_alphabet),' '))) > 0 THEN
-				DBMS_OUTPUT.PUT_LINE('ERROR LAST NAME! IN THIS FIELD YOU CAN USE ONLY LETTERS. ');
-				v_flag := FALSE;
-			ELSE 
-				--VALIDATE PESEL
-                IF f_validate_pesel(v_pesel_client) THEN 
-                    NULL;
-                END IF;
-                DBMS_OUTPUT.PUT_LINE('VALIDATION SUCCESFUL.'); 
-			END IF;
-		END IF;   
+        v_flag := f_client_exist(v_pesel_client);
+        IF v_flag = TRUE THEN
+		    --VALIDATE FNAME
+		    IF  LENGTH(TRIM(TRANSLATE(upper(v_fname_client), upper(v_alphabet),' '))) > 0 THEN
+		    	v_flag := FALSE;
+                DBMS_OUTPUT.PUT_LINE('ERROR FIRST NAME! IN THIS FIELD YOU CAN USE ONLY LETTERS. Return value: FALSE');
+		    ELSE 
+		    	--VALIDATE LNAME
+		    	IF LENGTH(TRIM(TRANSLATE(upper(v_lname_client), upper(v_alphabet),' '))) > 0 THEN
+		    		v_flag := FALSE;
+                    DBMS_OUTPUT.PUT_LINE('ERROR LAST NAME! IN THIS FIELD YOU CAN USE ONLY LETTERS. Return value: FALSE');
+		    	ELSE 
+                    DBMS_OUTPUT.PUT_LINE('FULL VALIDATION SUCCESFUL. Return value: TRUE'); 
+			    END IF;
+		    END IF;   
+        ELSE 
+            RETURN v_flag;
+        END IF;
 		--sprawdzenie co jest w v_flag
-		v_show_bool:=CASE WHEN (sys.diutil.bool_to_int(v_flag)) = 1 THEN 'TRUE'
-						  WHEN (sys.diutil.bool_to_int(v_flag)) = 0 THEN  'FALSE'
-		END;  
-        dbms_output.put_line('Validate return: ' || v_show_bool);
+		/* v_show_bool := CASE 
+                            WHEN (sys.diutil.bool_to_int(v_flag)) = 1 THEN 'TRUE'
+					        WHEN (sys.diutil.bool_to_int(v_flag)) = 0 THEN  'FALSE' 
+                            END;
+        dbms_output.put_line('Validate return: ' || v_show_bool); */
         RETURN v_flag;
     END f_validate_client;
 
@@ -222,13 +226,13 @@ create or replace PACKAGE BODY PKG_ADD_CLIENT AS
     BEGIN
         IF LENGTH(v_pesel) != 11 THEN
             v_flag := FALSE;
-            DBMS_OUTPUT.PUT_LINE('ERROR PESEL! YOUR PESEL MUST HAVE 11 DIGITS.'); 
+            DBMS_OUTPUT.PUT_LINE('ERROR PESEL! Pesel must have 11 digits. Return value: FALSE'); 
         ELSE
             IF LENGTH(TRIM(TRANSLATE(v_pesel, '0123456789',' '))) > 0 THEN
-                DBMS_OUTPUT.PUT_LINE('ERROR PESEL! USE ONLY DIGITS.');
+                DBMS_OUTPUT.PUT_LINE('ERROR PESEL! Use only digits. Return value: FALSE');
                 v_flag := FALSE;
             ELSE
-                DBMS_OUTPUT.PUT_LINE('VALIDATION PESEL SUCCESFUL.'); 
+                DBMS_OUTPUT.PUT_LINE('VALIDATION PESEL SUCCESFUL. Return value: TRUE'); 
             END IF;
         END IF;
         /*Przyjmuje na ta chwile ze peselu nie trzeba walidowac
