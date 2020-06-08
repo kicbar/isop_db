@@ -178,47 +178,40 @@ create or replace PACKAGE BODY PKG_ADD_CLIENT AS
                 RETURN 0;
     END f_get_id_client;
 
-    FUNCTION f_get_client(v_pesel clients.pesel%type, v_fname clients.fname%type DEFAULT NULL, v_lname clients.lname%type DEFAULT NULL) RETURN clients%rowtype IS
+    FUNCTION f_get_client(v_pesel clients.pesel%type DEFAULT NULL, v_fname clients.fname%type DEFAULT NULL, v_lname clients.lname%type DEFAULT NULL) RETURN clients%rowtype IS
+        /* TO RUN
+        declare 
+            v_temp clients%rowtype;
+        begin 
+            v_temp := pkg_add_client.f_get_client(v_lname  => 'Makowski', v_fname  => 'Kuba');
+            DBMS_OUTPUT.PUT_LINE('PESEL: '|| v_temp.pesel);
+        end; */
         r_client clients%rowtype;
-        CURSOR c_get_client IS
-            SELECT *
-              FROM clients
-             WHERE pesel = v_pesel
-               AND status = 1;
+        v_query_get_client VARCHAR2(200);
     BEGIN
+        v_query_get_client := 'SELECT *
+                                 FROM clients
+                                WHERE status = 1';
         IF v_fname IS NOT NULL THEN
-            IF v_lname IS NOT NULL THEN
-                SELECT * 
-                  INTO r_client 
-                  FROM clients
-                 WHERE pesel = v_pesel
-                   AND fname = v_fname 
-                   AND lname = v_lname
-                   AND status = 1;
-            ELSE 
-                SELECT * 
-                  INTO r_client 
-                  FROM clients
-                 WHERE pesel = v_pesel
-                   AND lname = v_lname
-                   AND status = 1;                 
-            END IF;
-        ELSE 
---            SELECT * 
---              INTO r_client 
---              FROM clients
---             WHERE status = 1;  
-            OPEN c_get_client;
-            FETCH c_get_client INTO r_client;
-            CLOSE c_get_client;
-        END IF; 
-
+            v_query_get_client := v_query_get_client || ' AND fname = ' || ''''||v_fname||''''; 
+        END IF;
+        
+        IF v_lname IS NOT NULL THEN
+            v_query_get_client := v_query_get_client || ' AND lname = ' || ''''||v_lname||'''';
+        END IF;
+        
+        IF v_pesel IS NOT NULL THEN     
+            v_query_get_client := v_query_get_client || ' AND pesel = ' || ''''||v_pesel||'''' ;    
+        END IF;
+        /*TRZEBA OBSŁUŻYĆ SYTUACJE W KTÓREJ NIC NIE ZWRACA*/
+        EXECUTE IMMEDIATE v_query_get_client INTO r_client;
         RETURN r_client;
+        
         EXCEPTION
             WHEN NO_DATA_FOUND THEN
-                DBMS_OUTPUT.PUT_LINE('Client for pesel '||v_pesel||' not found. CODE ERROR: '|| SQLERRM);
+                DBMS_OUTPUT.PUT_LINE('Client for data: '||v_pesel||' '|| v_fname || ' ' || v_lname ||' not found. CODE ERROR: '|| SQLERRM);
             WHEN TOO_MANY_ROWS THEN
-                DBMS_OUTPUT.PUT_LINE('Numbers of clients for pesel '||v_pesel||' is too big. CODE ERROR: '|| SQLERRM);
+                DBMS_OUTPUT.PUT_LINE('Numbers of clients for data: '||v_pesel|| ' ' || v_fname ||' '|| v_lname ||' is too big. CODE ERROR: '|| SQLERRM);
             WHEN OTHERS THEN
                 --DBMS_OUTPUT.PUT_LINE('Other error happened. CODE ERROR: '|| SQLERRM);
                 raise_application_error(-20001,'An error was encountered - '||SQLCODE||' -ERROR- '||SQLERRM);

@@ -107,7 +107,8 @@ create or replace PACKAGE PKG_ADD_CLIENT AS
     */
     FUNCTION f_get_client(v_pesel clients.pesel%type, v_fname clients.fname%type, v_lname clients.lname%type) RETURN clients%rowtype;
     /*
-    Ta funkcja sprawdza poprawność wprowadzanych danych.
+    Ta funkcja sprawdza pobiera dane clienta.
+    Wykorzystuje dynamiczny SQL.
     ------------------------------------------------------------------------------------------------------
     VERSION      DATE         AUTHOR     DESCRIPTION
     1.0.30/05    30/05/2020   b.kicior   Utworzenie funkcji. 
